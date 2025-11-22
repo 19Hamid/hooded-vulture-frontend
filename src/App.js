@@ -15,7 +15,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const chatBoxRef = useRef(null);
 
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://hooded-vulture-backend.vercel.app/api/chat";
 
   const moodImages = {
     happy: happyVulture,
@@ -34,10 +34,10 @@ function App() {
 
     try {
       // Call the backend using the environment variable
-      const res = await axios.post(process.env.REACT_APP_BACKEND_URL, {
+      const res = await axios.post(BACKEND_URL, {
         text: trimmedInput,
         personality,
-        sessionId: "user_hamid"
+        sessionId: "user_hamid",
       });
 
       // Add bot response
