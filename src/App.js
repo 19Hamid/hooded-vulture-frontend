@@ -15,7 +15,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const chatBoxRef = useRef(null);
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://siby-ibdz7att2-mouhamediallos-projects.vercel.app/chat";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://siby-ibdz7att2-mouhamediallos-projects.vercel.app";
 
   const moodImages = {
     happy: happyVulture,
