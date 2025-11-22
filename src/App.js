@@ -43,7 +43,7 @@ function App() {
       // Add bot response
       setMessages(prev => [
         ...prev,
-        { sender: "bot", text: res.data.reply || "🦅 BeakSpeak couldn’t respond 😭" }
+        { sender: "bot", text: res.data.reply || "🦅 BeakSpeak couldn't respond 😭" }
       ]);
     } catch (error) {
       setMessages(prev => [
