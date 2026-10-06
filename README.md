@@ -1,27 +1,104 @@
 # BeakSpeak
 
-A React + Vite chatbot and five-question hooded vulture quiz. The existing Habitat loss and Senegal answers are intentionally preserved.
+An educational chatbot and quiz about hooded vultures, built as a first-year AI degree project.
 
-## Run
+Ask questions, choose the assistant's tone and test your knowledge in a five-question quiz.
 
-Use Node 22.12 or later. Run `npm ci`, then `npm start`. The app opens on port 3000. For a local backend, copy `.env.example` to `.env.local` and set `REACT_APP_BACKEND_URL=http://localhost:3001`.
+**[Live app](https://beakspeak-chatbot.vercel.app/)** · **[Node backend](https://github.com/19Hamid/hooded-vulture-backend)** · **[Deployment guide](docs/DEPLOYMENT.md)**
 
-`REACT_APP_BACKEND_URL` accepts a base hostname or the full `/api/chat` endpoint. If omitted, it defaults to the production backend. Vercel's existing variable with the backend hostname continues to work. A changed build-time variable requires a new frontend deployment.
+<img src="src/assets/images/normal.webp" alt="BeakSpeak vulture mascot" width="160">
 
-Run `npm test` for regressions and `npm run build` for the production build.
+## Features
 
-## Behaviour
+- Three assistant personalities: calm, playful and strict.
+- Follow-up questions with recent conversation context.
+- Stop, retry, edit and clear controls for chat messages.
+- A shuffled quiz with feedback, scores and collectible badges.
+- A collapsible game panel, keyboard controls, accessible labels and reduced-motion support.
 
-Chat keeps up to 40 successful turns in the current tab's session storage and sends at most six complete turns (12,000 characters) as context. Clear chat resets both the transcript and the session identifier. Failed and stopped turns are never sent as conversation history; the last failed message can be retried or edited. Requests time out after 30 seconds and can be stopped. Mood changes apply to new messages; a retry uses the original mood.
+## How it works
 
-Quiz answers lock after one selection. Next question lets the player read feedback at their own pace. The round and collected badges are saved in local storage; replay starts a new shuffled round while retaining badges. This is a casual local game, not a verified leaderboard.
+| Part | Responsibility |
+| --- | --- |
+| React frontend | Chat interface, mood selection and quiz |
+| Node.js API on Vercel | Request validation, Groq calls and error handling |
+| Groq | Hosted language-model inference |
+| Browser storage | The current tab's chat and the browser's quiz progress |
 
-The sidebar is removed from layout, keyboard navigation, and the accessibility tree when hidden. It starts closed on small screens and opens above the chat. Reduced-motion settings are respected.
+The frontend calls `POST /api/chat` in the separate Node backend. The Groq API key stays on the server. The backend chooses the model; the default is `openai/gpt-oss-20b`.
 
-## Deployment
+The [Python backend](https://github.com/19Hamid/python-backend) is a separate implementation. The live app uses the Node.js API.
 
-The Node backend repository owns `/api/chat` and its Groq key. Deploy that backend before this frontend. Frontend preview origins on Hamid's existing Vercel team are allowed by the repaired backend. For another team or custom domain, configure backend `ALLOWED_ORIGINS` explicitly.
+## Run locally
 
-No provider secrets belong in this repository. Dependencies are installed from `package-lock.json`; do not commit `node_modules` or the old backend backup.
+Requirements: **Node.js 22.12 or later** and npm.
 
-The build uses Vite and the regressions use Vitest. `vercel.json` explicitly selects the Vite framework and retains the `build` output directory. The previous Create React App toolchain has been removed.
+```bash
+git clone https://github.com/19Hamid/hooded-vulture-frontend.git
+cd hooded-vulture-frontend
+npm ci
+cp .env.example .env.local
+```
+
+For a local API, set this value in `.env.local`:
+
+```dotenv
+REACT_APP_BACKEND_URL=http://localhost:3001
+```
+
+Start the [Node backend](https://github.com/19Hamid/hooded-vulture-backend#run-locally) in a second terminal, then run:
+
+```bash
+npm start
+```
+
+Open **http://localhost:3000**. The quiz works without an API key; chat needs a configured backend.
+
+On PowerShell, use `Copy-Item .env.example .env.local` instead of `cp`.
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Start the development server on port 3000 |
+| `npm test` | Run the frontend regression tests |
+| `npm run build` | Create a production build in `build/` |
+| `npm run preview` | Preview the latest production build |
+
+Tests use Vitest and React Testing Library and cover chat history, cancellation, retries, input handling, quiz scoring and persistence.
+
+## Configuration
+
+`REACT_APP_BACKEND_URL` accepts a base URL or a full `/api/chat` URL. It defaults to `https://hooded-vulture-backend.vercel.app`.
+
+The value is embedded at build time. Restart the development server or redeploy after changing it. Provider keys belong in the backend's environment variables.
+
+## Data and current limits
+
+- Messages and recent context are sent to the Node API and Groq to generate replies.
+- Up to 40 completed turns are saved in the current tab's `sessionStorage`.
+- Each request includes at most six complete previous turns and 12,000 characters of context.
+- Quiz progress and unique badges are saved in `localStorage`. Replay resets the round and keeps earned badges.
+- Clear chat removes the transcript and creates a new anonymous session identifier.
+- AI answers are generated rather than checked against a curated knowledge base. Quiz questions are maintained manually.
+- Scores belong to the local browser. There are no user accounts or verified leaderboards.
+- Backend usage controls depend on deployment configuration; see [usage limits](https://github.com/19Hamid/hooded-vulture-backend#usage-limits).
+
+## Project structure
+
+| Path | Contents |
+| --- | --- |
+| `src/App.jsx` | Chat interface and request lifecycle |
+| `src/chat.js` | Endpoint configuration, history, storage and errors |
+| `src/MiniGames.jsx` | Quiz interface |
+| `src/quiz.js` | Questions, shuffle, scoring and saved progress |
+| `src/assets/images/` | WebP mascot images |
+| `src/*.test.jsx` | Frontend regression tests |
+| `vite.config.js` | Vite build and Vitest configuration |
+| `vercel.json` | Vercel build settings |
+
+## Contributing
+
+Open an issue or pull request with a clear description and reproduction steps. Run `npm test` and `npm run build` before submitting changes.
+
+Created by [Hamid](https://github.com/19Hamid).
