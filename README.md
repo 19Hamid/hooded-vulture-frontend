@@ -1,70 +1,27 @@
-# Getting Started with Create React App
+# BeakSpeak
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React + Vite chatbot and five-question hooded vulture quiz. The existing Habitat loss and Senegal answers are intentionally preserved.
 
-## Available Scripts
+## Run
 
-In the project directory, you can run:
+Use Node 22.12 or later. Run `npm ci`, then `npm start`. The app opens on port 3000. For a local backend, copy `.env.example` to `.env.local` and set `REACT_APP_BACKEND_URL=http://localhost:3001`.
 
-### `npm start`
+`REACT_APP_BACKEND_URL` accepts a base hostname or the full `/api/chat` endpoint. If omitted, it defaults to the production backend. Vercel's existing variable with the backend hostname continues to work. A changed build-time variable requires a new frontend deployment.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Run `npm test` for regressions and `npm run build` for the production build.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Behaviour
 
-### `npm test`
+Chat keeps up to 40 successful turns in the current tab's session storage and sends at most six complete turns (12,000 characters) as context. Clear chat resets both the transcript and the session identifier. Failed and stopped turns are never sent as conversation history; the last failed message can be retried or edited. Requests time out after 30 seconds and can be stopped. Mood changes apply to new messages; a retry uses the original mood.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Quiz answers lock after one selection. Next question lets the player read feedback at their own pace. The round and collected badges are saved in local storage; replay starts a new shuffled round while retaining badges. This is a casual local game, not a verified leaderboard.
 
-### `npm run build`
+The sidebar is removed from layout, keyboard navigation, and the accessibility tree when hidden. It starts closed on small screens and opens above the chat. Reduced-motion settings are respected.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Deployment
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The Node backend repository owns `/api/chat` and its Groq key. Deploy that backend before this frontend. Frontend preview origins on Hamid's existing Vercel team are allowed by the repaired backend. For another team or custom domain, configure backend `ALLOWED_ORIGINS` explicitly.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+No provider secrets belong in this repository. Dependencies are installed from `package-lock.json`; do not commit `node_modules` or the old backend backup.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The build uses Vite and the regressions use Vitest. `vercel.json` explicitly selects the Vite framework and retains the `build` output directory. The previous Create React App toolchain has been removed.
