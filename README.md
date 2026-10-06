@@ -1,70 +1,104 @@
-# Getting Started with Create React App
+# BeakSpeak
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An educational chatbot and quiz about hooded vultures, built as a first-year AI degree project.
 
-## Available Scripts
+Ask questions, choose the assistant's tone and test your knowledge in a five-question quiz.
 
-In the project directory, you can run:
+**[Live app](https://beakspeak-chatbot.vercel.app/)** · **[Node backend](https://github.com/19Hamid/hooded-vulture-backend)** · **[Deployment guide](docs/DEPLOYMENT.md)**
 
-### `npm start`
+<img src="src/assets/images/normal.webp" alt="BeakSpeak vulture mascot" width="160">
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Three assistant personalities: calm, playful and strict.
+- Follow-up questions with recent conversation context.
+- Stop, retry, edit and clear controls for chat messages.
+- A shuffled quiz with feedback, scores and collectible badges.
+- A collapsible game panel, keyboard controls, accessible labels and reduced-motion support.
 
-### `npm test`
+## How it works
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Part | Responsibility |
+| --- | --- |
+| React frontend | Chat interface, mood selection and quiz |
+| Node.js API on Vercel | Request validation, Groq calls and error handling |
+| Groq | Hosted language-model inference |
+| Browser storage | The current tab's chat and the browser's quiz progress |
 
-### `npm run build`
+The frontend calls `POST /api/chat` in the separate Node backend. The Groq API key stays on the server. The backend chooses the model; the default is `openai/gpt-oss-20b`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The [Python backend](https://github.com/19Hamid/python-backend) is a separate implementation. The live app uses the Node.js API.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Run locally
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Requirements: **Node.js 22.12 or later** and npm.
 
-### `npm run eject`
+```bash
+git clone https://github.com/19Hamid/hooded-vulture-frontend.git
+cd hooded-vulture-frontend
+npm ci
+cp .env.example .env.local
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+For a local API, set this value in `.env.local`:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```dotenv
+REACT_APP_BACKEND_URL=http://localhost:3001
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Start the [Node backend](https://github.com/19Hamid/hooded-vulture-backend#run-locally) in a second terminal, then run:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm start
+```
 
-## Learn More
+Open **http://localhost:3000**. The quiz works without an API key; chat needs a configured backend.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+On PowerShell, use `Copy-Item .env.example .env.local` instead of `cp`.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Commands
 
-### Code Splitting
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Start the development server on port 3000 |
+| `npm test` | Run the frontend regression tests |
+| `npm run build` | Create a production build in `build/` |
+| `npm run preview` | Preview the latest production build |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Tests use Vitest and React Testing Library and cover chat history, cancellation, retries, input handling, quiz scoring and persistence.
 
-### Analyzing the Bundle Size
+## Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+`REACT_APP_BACKEND_URL` accepts a base URL or a full `/api/chat` URL. It defaults to `https://hooded-vulture-backend.vercel.app`.
 
-### Making a Progressive Web App
+The value is embedded at build time. Restart the development server or redeploy after changing it. Provider keys belong in the backend's environment variables.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Data and current limits
 
-### Advanced Configuration
+- Messages and recent context are sent to the Node API and Groq to generate replies.
+- Up to 40 completed turns are saved in the current tab's `sessionStorage`.
+- Each request includes at most six complete previous turns and 12,000 characters of context.
+- Quiz progress and unique badges are saved in `localStorage`. Replay resets the round and keeps earned badges.
+- Clear chat removes the transcript and creates a new anonymous session identifier.
+- AI answers are generated rather than checked against a curated knowledge base. Quiz questions are maintained manually.
+- Scores belong to the local browser. There are no user accounts or verified leaderboards.
+- Backend usage controls depend on deployment configuration; see [usage limits](https://github.com/19Hamid/hooded-vulture-backend#usage-limits).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Project structure
 
-### Deployment
+| Path | Contents |
+| --- | --- |
+| `src/App.jsx` | Chat interface and request lifecycle |
+| `src/chat.js` | Endpoint configuration, history, storage and errors |
+| `src/MiniGames.jsx` | Quiz interface |
+| `src/quiz.js` | Questions, shuffle, scoring and saved progress |
+| `src/assets/images/` | WebP mascot images |
+| `src/*.test.jsx` | Frontend regression tests |
+| `vite.config.js` | Vite build and Vitest configuration |
+| `vercel.json` | Vercel build settings |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Contributing
 
-### `npm run build` fails to minify
+Open an issue or pull request with a clear description and reproduction steps. Run `npm test` and `npm run build` before submitting changes.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Created by [Hamid](https://github.com/19Hamid).
